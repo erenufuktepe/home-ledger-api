@@ -1,6 +1,8 @@
+from datetime import datetime
+
 from sqlalchemy.exc import IntegrityError
 
-from app.exceptions import UserExistsError, UserNotFoundError
+from app.exceptions import ConflictError, NotFoundError
 from app.models import User
 from app.repositories import UserRepository
 from app.schemas import UserCreateRequest, UserDTO, UserUpdateRequest
@@ -20,24 +22,24 @@ class UserService:
     def get_user_by_id(self, id: int) -> UserDTO:
         user = self.repository.get_by_id(id)
         if not user:
-            raise UserNotFoundError(id)
+            raise NotFoundError(f"User with {id} id not found.")
         return ModelMapper.from_model(user, UserDTO)
 
     def create_user(self, request: UserCreateRequest) -> bool:
         try:
-            user = UserDTO(username=request.username.title())
-            new_user = ModelMapper.from_schema(user, User)
-            if not self.repository.insert(new_user):
+            user = ModelMapper.from_schema(request, User)
+            user.created_at = datetime.now()
+            if not self.repository.insert(user):
                 return False
             return True
         except IntegrityError as exc:
-            raise UserExistsError(request.username)
+            raise ConflictError(f"User {request.username.title()} already exists.")
 
     def update_user(self, request: UserUpdateRequest) -> bool:
         user = self.repository.get_by_id(request.id)
 
         if not user:
-            raise UserNotFoundError(request.id)
+            raise NotFoundError(f"User with {request.id} id not found.")
         user.username = request.username.title()
         if not self.repository.upsert(user):
             return False
@@ -46,7 +48,5 @@ class UserService:
     def delete_user(self, id: int) -> bool:
         user = self.repository.get_by_id(id)
         if not user:
-            raise UserNotFoundError(id)
-        if not self.repository.delete(user):
-            return False
-        return True
+            raise NotFoundError(f"User with {id} id not found.")
+        return self.repository.delete(user)

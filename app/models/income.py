@@ -19,5 +19,6 @@ class Income(Base):
     owner_user_id = Column(BigInteger, ForeignKey("users.id"))
     amount = Column(Numeric, nullable=False)
     income_type = Column(String, nullable=False)
+    frequency = Column(String, nullable=False)
     created_at = Column(DateTime)
     user = relationship("User")

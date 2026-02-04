@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class UserDTO(BaseModel):
@@ -13,6 +13,11 @@ class UserDTO(BaseModel):
 
 class UserCreateRequest(BaseModel):
     username: str = Field(..., description="Full name of the user.")
+
+    @field_validator("username", mode="before")
+    @classmethod
+    def normalize_username(cls, value: str) -> str:
+        return value.strip().title()
 
 
 class UserUpdateRequest(BaseModel):

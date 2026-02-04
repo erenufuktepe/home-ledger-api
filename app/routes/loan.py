@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from app.routes.dependencies import get_loan_service
-from app.schemas import LoanDTO
+from app.schemas import LoanCreateRequest, LoanDTO, LoanUpdateRequest
 from app.services import LoanService
 
 router = APIRouter(tags=["Loan"])
@@ -19,19 +19,28 @@ async def get_all_loans(
 @router.get("/loan/{id}")
 async def get_loan(
     id: int, service: Annotated[LoanService, Depends(get_loan_service)]
-) -> LoanDTO | None:
+) -> LoanDTO:
     return service.get_loan_by_id(id)
 
 
-@router.post("/loan")
+@router.post("/loan", status_code=201)
 async def create_loan(
-    loanname: str, service: Annotated[LoanService, Depends(get_loan_service)]
-):
-    pass
+    request: LoanCreateRequest,
+    service: Annotated[LoanService, Depends(get_loan_service)],
+) -> bool:
+    return service.create_loan(request)
 
 
-@router.put("/loan")
+@router.put("/loan", status_code=200)
 async def update_loan(
-    loan: LoanDTO, service: Annotated[LoanService, Depends(get_loan_service)]
-):
-    service.update_loan(loan)
+    request: LoanUpdateRequest,
+    service: Annotated[LoanService, Depends(get_loan_service)],
+) -> bool:
+    return service.update_loan(request)
+
+
+@router.delete("/loan/{id}", status_code=200)
+async def delete_loan(
+    id: int, service: Annotated[LoanService, Depends(get_loan_service)]
+) -> bool:
+    return service.delete_loan(id)

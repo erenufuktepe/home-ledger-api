@@ -15,35 +15,15 @@ class AppError(Exception):
         return self.message
 
 
-class UserNotFoundError(AppError):
-    def __init__(self, id: int, *, details=None):
-        super().__init__(
-            message=f"User with {id} id not found.",
-            code="not_found",
-            status_code=404,
-            details=details,
-        )
-
-
-class UserExistsError(AppError):
-    def __init__(self, username: str, *, details=None):
-        super().__init__(
-            message=f"User {username} already exists.",
-            code="not_found",
-            status_code=409,
-            details=details,
-        )
-
-
 class NotFoundError(AppError):
-    def __init__(self, message: str = "Resource not found", *, details=None):
+    def __init__(self, details, *, message: str = "Resource not found"):
         super().__init__(
             message=message, code="not_found", status_code=404, details=details
         )
 
 
 class ConflictError(AppError):
-    def __init__(self, message: str = "Conflict", *, details=None):
+    def __init__(self, details, *, message: str = "Conflict"):
         super().__init__(
             message=message, code="conflict", status_code=409, details=details
         )

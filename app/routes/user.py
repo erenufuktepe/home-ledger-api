@@ -21,10 +21,7 @@ async def get_all_users(
 async def get_user(
     id: int, service: Annotated[UserService, Depends(get_user_service)]
 ) -> UserDTO:
-    try:
-        return service.get_user_by_id(id)
-    except AppError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+    return service.get_user_by_id(id)
 
 
 @router.post("/user", status_code=201)
