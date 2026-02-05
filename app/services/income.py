@@ -42,8 +42,7 @@ class IncomeService:
                 raise NotFoundError(f"Income with {request.id} not found.")
             income.amount = request.amount
             income.income_type = request.income_type
-            income.created_at = request.created_at
-            income.owner_user_id = request.owner_user_id
+            income.frequency = request.frequency
 
             if not self.repository.upsert(income):
                 return False

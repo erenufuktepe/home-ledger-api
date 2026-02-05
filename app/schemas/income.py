@@ -39,8 +39,3 @@ class IncomeUpdateRequest(BaseModel):
     frequency: Frequency = Field(
         ..., description="Income frequency (monthly/yearly/biweekly/weekly)."
     )
-
-    created_at: datetime = Field(
-        datetime.now(), description="Income information created in the system."
-    )
-    owner_user_id: int = Field(..., description="User id of the income owner.")
