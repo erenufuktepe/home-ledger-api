@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_session
 from app.repositories import (
     CreditCardRepository,
+    DashboardRepository,
     IncomeRepository,
     LoanRepository,
     RecurringPaymentRepository,
@@ -11,6 +12,7 @@ from app.repositories import (
 )
 from app.services import (
     CreditCardService,
+    DashboardService,
     IncomeService,
     LoanService,
     RecurringPaymentService,
@@ -38,3 +40,9 @@ def get_recurring_payment_service(
     db: Session = Depends(get_session),
 ) -> RecurringPaymentService:
     return RecurringPaymentService(RecurringPaymentRepository(db))
+
+
+def get_dashboard_service(
+    db: Session = Depends(get_session),
+) -> DashboardService:
+    return DashboardService(DashboardRepository(db))

@@ -44,23 +44,6 @@ CREATE TABLE finance.recurring_payments (
         due_month IS NULL
         OR due_month BETWEEN 1 AND 12
     ),
-    CONSTRAINT ck_frequency_due_logic CHECK (
-        (
-            frequency = 'monthly'
-            AND due_day IS NOT NULL
-            AND due_month IS NULL
-        )
-        OR (
-            frequency = 'yearly'
-            AND due_day IS NOT NULL
-            AND due_month IS NOT NULL
-        )
-        OR (
-            frequency IN ('weekly', 'biweekly')
-            AND due_day IS NULL
-            AND due_month IS NULL
-        )
-    ),
     FOREIGN KEY (payer_user_id) REFERENCES finance.users (id)
 );
 

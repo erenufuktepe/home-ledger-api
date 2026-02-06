@@ -1,4 +1,5 @@
 from app.repositories.credit_card import CreditCardRepository
+from app.repositories.dashboard import DashboardRepository
 from app.repositories.income import IncomeRepository
 from app.repositories.loan import LoanRepository
 from app.repositories.recurring_payment import RecurringPaymentRepository
@@ -10,4 +11,5 @@ __all__ = [
     "LoanRepository",
     "IncomeRepository",
     "CreditCardRepository",
+    "DashboardRepository",
 ]

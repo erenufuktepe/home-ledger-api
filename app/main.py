@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.exceptions import AppError
-from app.routes import credit_card, income, loan, recurring_payment, user
+from app.routes import credit_card, dashboard, income, loan, recurring_payment, user
 
 app = FastAPI()
 
@@ -19,8 +19,9 @@ async def app_error_handler(_: Request, exc: AppError):
     )
 
 
+app.include_router(dashboard.router)
 app.include_router(user.router)
 app.include_router(income.router)
 app.include_router(loan.router)
-app.include_router(recurring_payment.router)
 app.include_router(credit_card.router)
+app.include_router(recurring_payment.router)

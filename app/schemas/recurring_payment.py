@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 from app.enums import Frequency, PaymentPurpose, SpendingCategory
 from app.schemas.user import UserDTO
@@ -40,25 +40,6 @@ class RecurringPaymentCreateRequest(BaseModel):
     )
     payer_user_id: int = Field(..., description="Payer user id.")
 
-    @model_validator(mode="after")
-    def validate_frequency_due_logic(self):
-        if self.frequency == Frequency.MONTHLY:
-            if self.due_day is None or self.due_month is not None:
-                raise ValueError(
-                    "For monthly frequency, due_day is required and due_month must be null."
-                )
-        elif self.frequency == Frequency.YEARLY:
-            if self.due_day is None or self.due_month is None:
-                raise ValueError(
-                    "For yearly frequency, due_day and due_month are required."
-                )
-        elif self.frequency in (Frequency.WEEKLY, Frequency.BIWEEKLY):
-            if self.due_day is not None or self.due_month is not None:
-                raise ValueError(
-                    "For weekly/biweekly frequency, due_day and due_month must be null."
-                )
-        return self
-
 
 class RecurringPaymentUpdateRequest(BaseModel):
     id: int = Field(..., description="Primary key for the recurring payment.")
@@ -74,22 +55,3 @@ class RecurringPaymentUpdateRequest(BaseModel):
         None, ge=1, le=12, description="Recurring payment month."
     )
     payer_user_id: int = Field(..., description="Payer user id.")
-
-    @model_validator(mode="after")
-    def validate_frequency_due_logic(self):
-        if self.frequency == Frequency.MONTHLY:
-            if self.due_day is None or self.due_month is not None:
-                raise ValueError(
-                    "For monthly frequency, due_day is required and due_month must be null."
-                )
-        elif self.frequency == Frequency.YEARLY:
-            if self.due_day is None or self.due_month is None:
-                raise ValueError(
-                    "For yearly frequency, due_day and due_month are required."
-                )
-        elif self.frequency in (Frequency.WEEKLY, Frequency.BIWEEKLY):
-            if self.due_day is not None or self.due_month is not None:
-                raise ValueError(
-                    "For weekly/biweekly frequency, due_day and due_month must be null."
-                )
-        return self

@@ -1,0 +1,18 @@
+services:
+  home-ledger-api:
+    image: ghcr.io/erenufuktepe/home-ledger-api:latest
+    container_name: home-ledger-api
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    ports:
+      - "8001:8000"
+
+    networks:
+      - shared_net
+
+networks:
+  shared_net:
+    external: true

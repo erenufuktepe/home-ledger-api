@@ -28,3 +28,5 @@ class SpendingCategory(str, enum.Enum):
     DINING = "restaurants & dining"
     TRANSPORTATION = "transportation"
     INSURANCE = "insurance"
+    LOAN = "loan"
+    OTHER = "other"

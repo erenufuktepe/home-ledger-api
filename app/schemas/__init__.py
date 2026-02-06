@@ -3,6 +3,7 @@ from app.schemas.credit_card import (
     CreditCardDTO,
     CreditCardUpdateRequest,
 )
+from app.schemas.dashboard import Dashboard, Payment
 from app.schemas.income import IncomeCreateRequest, IncomeDTO, IncomeUpdateRequest
 from app.schemas.loan import LoanCreateRequest, LoanDTO, LoanUpdateRequest
 from app.schemas.recurring_payment import (
@@ -28,4 +29,6 @@ __all__ = [
     "CreditCardDTO",
     "CreditCardUpdateRequest",
     "CreditCardCreateRequest",
+    "Dashboard",
+    "Payment",
 ]
