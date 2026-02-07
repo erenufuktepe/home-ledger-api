@@ -10,10 +10,21 @@ class Settings(BaseSettings):
     TZ: str = "America/Chicago"
     DATABASE_URL: str
     DEBUG: bool = False
+    CORS_ALLOW_ORIGINS: str
 
     @property
     def tzinfo(self):
         return ZoneInfo(self.TZ)
+
+    @property
+    def cors_allow_origins(self) -> list[str]:
+        if not self.CORS_ALLOW_ORIGINS:
+            return []
+        return [
+            origin.strip()
+            for origin in self.CORS_ALLOW_ORIGINS.split(",")
+            if origin.strip()
+        ]
 
     class Config:
         env_file = ".env"
