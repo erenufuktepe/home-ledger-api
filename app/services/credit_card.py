@@ -17,6 +17,12 @@ class CreditCardService:
             return []
         return ModelMapper.from_model_list(credit_cards, CreditCardDTO)
 
+    def get_credit_cards_by_user_id(self, user_id: int) -> list[CreditCardDTO]:
+        credit_cards = self.repository.get_all_by_user_id(user_id)
+        if not credit_cards:
+            return []
+        return ModelMapper.from_model_list(credit_cards, CreditCardDTO)
+
     def get_credit_card_by_id(self, id: int) -> CreditCardDTO:
         credit_card = self.repository.get_by_id(id)
         if not credit_card:
@@ -25,20 +31,23 @@ class CreditCardService:
 
     def create_credit_card(self, request: CreditCardCreateRequest) -> bool:
         try:
-            credit_cart = ModelMapper.from_schema(request, CreditCard)
-            if not self.repository.insert(credit_cart):
+            credit_card = ModelMapper.from_schema(request, CreditCard)
+            if not self.repository.insert(credit_card):
                 return False
             return True
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.owner_user_id} id not found.")
+            raise NotFoundError(f"User with {request.user_id} id not found.")
 
     def update_credit_card(self, request: CreditCardUpdateRequest) -> bool:
         credit_card = self.repository.get_by_id(request.id)
         if not credit_card:
             raise NotFoundError(f"Credit card with {request.id} id not found.")
 
+        credit_card.user_id = request.user_id
         credit_card.name = request.name
         credit_card.current_balance = request.current_balance
+        credit_card.apr = request.apr
+        credit_card.credit_limit = request.credit_limit
 
         if not self.repository.upsert(credit_card):
             return False

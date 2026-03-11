@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from sqlalchemy.exc import IntegrityError
 
 from app.exceptions import ConflictError, NotFoundError
@@ -28,7 +26,6 @@ class UserService:
     def create_user(self, request: UserCreateRequest) -> bool:
         try:
             user = ModelMapper.from_schema(request, User)
-            user.created_at = datetime.now()
             if not self.repository.insert(user):
                 return False
             return True

@@ -16,6 +16,10 @@ class DashboardRepository:
                 RecurringPayment.amount,
             ),
             (
+                RecurringPayment.frequency == Frequency.SEMIMONTHLY.value,
+                RecurringPayment.amount * 2,
+            ),
+            (
                 RecurringPayment.frequency == Frequency.YEARLY.value,
                 RecurringPayment.amount / 12,
             ),
@@ -63,6 +67,7 @@ class DashboardRepository:
     def get_user_summary(self):
         monthly_income_expr = case(
             (Income.frequency == Frequency.MONTHLY.value, Income.amount),
+            (Income.frequency == Frequency.SEMIMONTHLY.value, Income.amount * 2),
             (Income.frequency == Frequency.YEARLY.value, Income.amount / 12),
             (Income.frequency == Frequency.WEEKLY.value, Income.amount * 52 / 12),
             (Income.frequency == Frequency.BIWEEKLY.value, Income.amount * 26 / 12),
@@ -70,10 +75,10 @@ class DashboardRepository:
         )
         income_subq = (
             self.session.query(
-                Income.owner_user_id.label("user_id"),
+                Income.user_id.label("user_id"),
                 func.coalesce(func.sum(monthly_income_expr), 0).label("total_income"),
             )
-            .group_by(Income.owner_user_id)
+            .group_by(Income.user_id)
             .subquery()
         )
 
@@ -81,6 +86,10 @@ class DashboardRepository:
             (
                 RecurringPayment.frequency == Frequency.MONTHLY.value,
                 RecurringPayment.amount,
+            ),
+            (
+                RecurringPayment.frequency == Frequency.SEMIMONTHLY.value,
+                RecurringPayment.amount * 2,
             ),
             (
                 RecurringPayment.frequency == Frequency.YEARLY.value,
@@ -97,11 +106,11 @@ class DashboardRepository:
             else_=0,
         )
         recurring_expense_q = self.session.query(
-            RecurringPayment.payer_user_id.label("user_id"),
+            RecurringPayment.user_id.label("user_id"),
             monthly_payment_expr.label("amount"),
         )
         loan_expense_q = self.session.query(
-            Loan.payer_user_id.label("user_id"),
+            Loan.user_id.label("user_id"),
             Loan.monthly_payment.label("amount"),
         )
         expense_union = recurring_expense_q.union_all(loan_expense_q).subquery()
@@ -118,12 +127,12 @@ class DashboardRepository:
 
         credit_card_subq = (
             self.session.query(
-                CreditCard.owner_user_id.label("user_id"),
+                CreditCard.user_id.label("user_id"),
                 func.coalesce(func.sum(CreditCard.current_balance), 0).label(
                     "total_credit_card_balance"
                 ),
             )
-            .group_by(CreditCard.owner_user_id)
+            .group_by(CreditCard.user_id)
             .subquery()
         )
 

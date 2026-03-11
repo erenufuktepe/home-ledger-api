@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from sqlalchemy.exc import IntegrityError
 
 from app.exceptions import NotFoundError
@@ -28,18 +26,18 @@ class IncomeService:
     def create_income(self, request: IncomeCreateRequest) -> bool:
         try:
             income = ModelMapper.from_schema(request, Income)
-            income.created_at = datetime.now()
             if not self.repository.insert(income):
                 return False
             return True
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.owner_user_id} not found.")
+            raise NotFoundError(f"User with {request.user_id} not found.")
 
     def update_income(self, request: IncomeUpdateRequest) -> bool:
         try:
             income = self.repository.get_by_id(request.id)
             if not income:
                 raise NotFoundError(f"Income with {request.id} not found.")
+            income.user_id = request.user_id
             income.amount = request.amount
             income.income_type = request.income_type
             income.frequency = request.frequency
@@ -48,7 +46,7 @@ class IncomeService:
                 return False
             return True
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.owner_user_id} not found.")
+            raise NotFoundError(f"User with {request.user_id} not found.")
 
     def delete_income(self, id: int) -> bool:
         income = self.repository.get_by_id(id)

@@ -1,9 +1,7 @@
 from sqlalchemy import (
     BigInteger,
     Column,
-    DateTime,
     ForeignKey,
-    Integer,
     Numeric,
     String,
 )
@@ -16,9 +14,8 @@ class Income(Base):
     __tablename__ = "incomes"
 
     id = Column(BigInteger, primary_key=True, nullable=False, autoincrement=True)
-    owner_user_id = Column(BigInteger, ForeignKey("users.id"))
-    amount = Column(Numeric, nullable=False)
-    income_type = Column(String, nullable=False)
-    frequency = Column(String, nullable=False)
-    created_at = Column(DateTime)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    amount = Column(Numeric(12, 2), nullable=False)
+    income_type = Column(String(10), nullable=False)
+    frequency = Column(String(20), nullable=False)
     user = relationship("User")

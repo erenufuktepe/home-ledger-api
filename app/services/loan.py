@@ -30,17 +30,19 @@ class LoanService:
                 return False
             return True
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.payer_user_id} not found.")
+            raise NotFoundError(f"User with {request.user_id} not found.")
 
     def update_loan(self, request: LoanUpdateRequest) -> bool:
         try:
             loan = self.repository.get_by_id(request.id)
             if not loan:
-                raise NotFoundError(f"Loan with {id} id not found.")
+                raise NotFoundError(f"Loan with {request.id} id not found.")
 
-            loan.payer_user_id = request.payer_user_id
+            loan.user_id = request.user_id
             loan.name = request.name
             loan.monthly_payment = request.monthly_payment
+            loan.remaining_amount = request.remaining_amount
+            loan.apr = request.apr
             loan.due_day = request.due_day
             loan.end_date = request.end_date
 
@@ -48,7 +50,7 @@ class LoanService:
                 return False
             return True
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.payer_user_id} not found.")
+            raise NotFoundError(f"User with {request.user_id} not found.")
 
     def delete_loan(self, id: int) -> bool:
         loan = self.repository.get_by_id(id)

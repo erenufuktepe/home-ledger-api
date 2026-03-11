@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from sqlalchemy.exc import IntegrityError
 
 from app.exceptions import NotFoundError
@@ -32,12 +30,11 @@ class RecurringPaymentService:
     def create_recurring_payment(self, request: RecurringPaymentCreateRequest) -> bool:
         try:
             recurring_payment = ModelMapper.from_schema(request, RecurringPayment)
-            recurring_payment.created_at = datetime.now()
             if not self.repository.insert(recurring_payment):
                 return False
             return True
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.payer_user_id} not found.")
+            raise NotFoundError(f"User with {request.user_id} not found.")
 
     def update_recurring_payment(self, request: RecurringPaymentUpdateRequest) -> bool:
         try:
@@ -52,13 +49,15 @@ class RecurringPaymentService:
             recurring_payment.amount = request.amount
             recurring_payment.due_day = request.due_day
             recurring_payment.due_month = request.due_month
-            recurring_payment.payer_user_id = request.payer_user_id
+            recurring_payment.user_id = request.user_id
+            recurring_payment.account_id = request.account_id
+            recurring_payment.credit_card_id = request.credit_card_id
 
             if not self.repository.upsert(recurring_payment):
                 return False
             return True
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.payer_user_id} not found.")
+            raise NotFoundError(f"User with {request.user_id} not found.")
 
     def delete_recurring_payment(self, id: int) -> bool:
         recurring_payment = self.repository.get_by_id(id)

@@ -6,8 +6,11 @@ from pydantic import BaseModel, Field, field_validator
 class UserDTO(BaseModel):
     id: int | None = Field(None, description="Primary key for the user.")
     username: str = Field(..., description="Full name of the user.")
-    created_at: datetime | None = Field(
-        datetime.now(), description="Created datetime for the user."
+    created_datetime: datetime | None = Field(
+        None, description="Created datetime for the user."
+    )
+    updated_datetime: datetime | None = Field(
+        None, description="Updated datetime for the user."
     )
 
 

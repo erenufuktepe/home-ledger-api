@@ -3,7 +3,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.exceptions import AppError
-from app.routes import credit_card, dashboard, income, loan, recurring_payment, user
+from app.routes import (
+    account,
+    account_snapshot,
+    cashback_rate,
+    credit_card,
+    dashboard,
+    income,
+    loan,
+    metadata,
+    recurring_payment,
+    transaction,
+    user,
+)
 from app.settings import settings
 
 app = FastAPI()
@@ -31,7 +43,12 @@ async def app_error_handler(_: Request, exc: AppError):
 
 app.include_router(dashboard.router)
 app.include_router(user.router)
+app.include_router(account.router)
+app.include_router(account_snapshot.router)
 app.include_router(income.router)
 app.include_router(loan.router)
 app.include_router(credit_card.router)
+app.include_router(cashback_rate.router)
 app.include_router(recurring_payment.router)
+app.include_router(transaction.router)
+app.include_router(metadata.router)

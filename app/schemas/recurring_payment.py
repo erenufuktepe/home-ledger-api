@@ -4,7 +4,6 @@ from decimal import Decimal
 from pydantic import BaseModel, Field
 
 from app.enums import Frequency, PaymentPurpose, SpendingCategory
-from app.schemas.user import UserDTO
 
 
 class RecurringPaymentDTO(BaseModel):
@@ -13,17 +12,24 @@ class RecurringPaymentDTO(BaseModel):
     category: SpendingCategory = Field(..., description="Recurring payment category.")
     purpose: PaymentPurpose = Field(..., description="Recurring payment pupose.")
     frequency: Frequency = Field(..., description="Recurring payment frequency.")
-    amount: Decimal = Field(..., ge=0.1, description="Recurring payment amount.")
+    amount: Decimal = Field(
+        ..., ge=0.1, description="Recurring payment amount.", example=89.99
+    )
     due_day: int | None = Field(
         None, ge=1, le=31, description="Recurring payment calender day."
     )
     due_month: int | None = Field(
         None, ge=1, le=12, description="Recurring payment month."
     )
-    created_at: datetime = Field(
-        datetime.now(), description="Recurring payment created datetime in the system."
+    user_id: int = Field(..., description="Owner user id.")
+    account_id: int | None = Field(None, description="Related account id.")
+    credit_card_id: int | None = Field(None, description="Related credit card id.")
+    created_datetime: datetime | None = Field(
+        None, description="Recurring payment created datetime in the system."
     )
-    user: UserDTO = Field(..., description="User who owns the payment.")
+    updated_datetime: datetime | None = Field(
+        None, description="Recurring payment updated datetime in the system."
+    )
 
 
 class RecurringPaymentCreateRequest(BaseModel):
@@ -31,14 +37,18 @@ class RecurringPaymentCreateRequest(BaseModel):
     category: SpendingCategory = Field(..., description="Recurring payment category.")
     purpose: PaymentPurpose = Field(..., description="Recurring payment pupose.")
     frequency: Frequency = Field(..., description="Recurring payment frequency.")
-    amount: Decimal = Field(..., ge=0.1, description="Recurring payment amount.")
+    amount: Decimal = Field(
+        ..., ge=0.1, description="Recurring payment amount.", example=89.99
+    )
     due_day: int | None = Field(
         None, ge=1, le=31, description="Recurring payment calender day."
     )
     due_month: int | None = Field(
         None, ge=1, le=12, description="Recurring payment month."
     )
-    payer_user_id: int = Field(..., description="Payer user id.")
+    user_id: int = Field(..., description="Owner user id.")
+    account_id: int | None = Field(None, description="Related account id.")
+    credit_card_id: int | None = Field(None, description="Related credit card id.")
 
 
 class RecurringPaymentUpdateRequest(BaseModel):
@@ -47,11 +57,15 @@ class RecurringPaymentUpdateRequest(BaseModel):
     category: SpendingCategory = Field(..., description="Recurring payment category.")
     purpose: PaymentPurpose = Field(..., description="Recurring payment pupose.")
     frequency: Frequency = Field(..., description="Recurring payment frequency.")
-    amount: Decimal = Field(..., ge=0.1, description="Recurring payment amount.")
+    amount: Decimal = Field(
+        ..., ge=0.1, description="Recurring payment amount.", example=89.99
+    )
     due_day: int | None = Field(
         None, ge=1, le=31, description="Recurring payment calender day."
     )
     due_month: int | None = Field(
         None, ge=1, le=12, description="Recurring payment month."
     )
-    payer_user_id: int = Field(..., description="Payer user id.")
+    user_id: int = Field(..., description="Owner user id.")
+    account_id: int | None = Field(None, description="Related account id.")
+    credit_card_id: int | None = Field(None, description="Related credit card id.")

@@ -1,7 +1,7 @@
 from sqlalchemy import (
     BigInteger,
     Column,
-    DateTime,
+    Date,
     ForeignKey,
     Integer,
     Numeric,
@@ -16,9 +16,11 @@ class Loan(Base):
     __tablename__ = "loans"
 
     id = Column(BigInteger, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String, nullable=False)
-    payer_user_id = Column(BigInteger, ForeignKey("users.id"))
-    monthly_payment = Column(Numeric, nullable=False)
+    name = Column(String(150), nullable=False)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    monthly_payment = Column(Numeric(12, 2), nullable=False)
+    remaining_amount = Column(Numeric(12, 2), nullable=False)
+    apr = Column(Numeric(5, 2), nullable=True)
     due_day = Column(Integer, nullable=False)
-    end_date = Column(DateTime, nullable=False)
+    end_date = Column(Date, nullable=True)
     user = relationship("User")

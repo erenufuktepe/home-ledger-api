@@ -16,6 +16,14 @@ async def get_all_credit_cards(
     return service.get_all_credit_cards()
 
 
+@router.get("/credit-card/user/{user_id}", status_code=200)
+async def get_credit_cards_by_user_id(
+    user_id: int,
+    service: Annotated[CreditCardService, Depends(get_credit_card_service)],
+) -> list[CreditCardDTO]:
+    return service.get_credit_cards_by_user_id(user_id)
+
+
 @router.get("/credit-card/{id}", status_code=200)
 async def get_credit_card(
     id: int, service: Annotated[CreditCardService, Depends(get_credit_card_service)]

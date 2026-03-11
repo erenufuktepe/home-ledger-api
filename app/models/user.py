@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Column, DateTime, String
+from sqlalchemy import BigInteger, Column, String
 
 from app.models.base import Base
 
@@ -7,5 +7,4 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(BigInteger, primary_key=True, nullable=False, autoincrement=True)
-    username = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False)
+    username = Column(String(100), nullable=False, unique=True)
