@@ -16,6 +16,13 @@ async def get_all_incomes(
     return service.get_all_incomes()
 
 
+@router.get("/income/user/{user_id}", status_code=200)
+async def get_incomes_by_user_id(
+    user_id: int, service: Annotated[IncomeService, Depends(get_income_service)]
+) -> list[IncomeDTO]:
+    return service.get_incomes_by_user_id(user_id)
+
+
 @router.get("/income/{id}", status_code=200)
 async def get_income(
     id: int, service: Annotated[IncomeService, Depends(get_income_service)]
@@ -27,7 +34,7 @@ async def get_income(
 async def create_income(
     request: IncomeCreateRequest,
     service: Annotated[IncomeService, Depends(get_income_service)],
-) -> bool:
+) -> IncomeDTO:
     return service.create_income(request)
 
 
@@ -35,7 +42,7 @@ async def create_income(
 async def update_income(
     request: IncomeUpdateRequest,
     service: Annotated[IncomeService, Depends(get_income_service)],
-) -> bool:
+) -> IncomeDTO:
     return service.update_income(request)
 
 

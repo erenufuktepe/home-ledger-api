@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 
-from app.exceptions import NotFoundError
+from app.exceptions import ConflictError, NotFoundError
 from app.models import RecurringPayment
 from app.repositories import RecurringPaymentRepository
 from app.schemas import (
@@ -27,16 +27,21 @@ class RecurringPaymentService:
             raise NotFoundError(f"Recurring payment with {id} not found.")
         return ModelMapper.from_model(recurring_payment, RecurringPaymentDTO)
 
-    def create_recurring_payment(self, request: RecurringPaymentCreateRequest) -> bool:
+    def get_recurring_payments_by_user_id(self, user_id: int) -> list[RecurringPaymentDTO]:
+        recurring_payments = self.repository.get_all_by_user_id(user_id)
+        if not recurring_payments:
+            return []
+        return ModelMapper.from_model_list(recurring_payments, RecurringPaymentDTO)
+
+    def create_recurring_payment(self, request: RecurringPaymentCreateRequest) -> RecurringPaymentDTO:
         try:
             recurring_payment = ModelMapper.from_schema(request, RecurringPayment)
-            if not self.repository.insert(recurring_payment):
-                return False
-            return True
+            created = self.repository.insert(recurring_payment)
+            return ModelMapper.from_model(created, RecurringPaymentDTO)
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.user_id} not found.")
+            raise ConflictError({"user_id": request.user_id}, message=f"User with id {request.user_id} not found.") from exc
 
-    def update_recurring_payment(self, request: RecurringPaymentUpdateRequest) -> bool:
+    def update_recurring_payment(self, request: RecurringPaymentUpdateRequest) -> RecurringPaymentDTO:
         try:
             recurring_payment = self.repository.get_by_id(request.id)
             if not recurring_payment:
@@ -53,11 +58,10 @@ class RecurringPaymentService:
             recurring_payment.account_id = request.account_id
             recurring_payment.credit_card_id = request.credit_card_id
 
-            if not self.repository.upsert(recurring_payment):
-                return False
-            return True
+            updated = self.repository.upsert(recurring_payment)
+            return ModelMapper.from_model(updated, RecurringPaymentDTO)
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.user_id} not found.")
+            raise ConflictError({"user_id": request.user_id}, message=f"User with id {request.user_id} not found.") from exc
 
     def delete_recurring_payment(self, id: int) -> bool:
         recurring_payment = self.repository.get_by_id(id)

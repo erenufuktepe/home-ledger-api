@@ -5,15 +5,12 @@ from fastapi.responses import JSONResponse
 from app.exceptions import AppError
 from app.routes import (
     account,
-    account_snapshot,
-    cashback_rate,
     credit_card,
     dashboard,
     income,
     loan,
     metadata,
     recurring_payment,
-    transaction,
     user,
 )
 from app.settings import settings
@@ -41,14 +38,19 @@ async def app_error_handler(_: Request, exc: AppError):
     )
 
 
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(_: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"message": "Internal server error", "code": "internal_error", "details": None},
+    )
+
+
 app.include_router(dashboard.router)
 app.include_router(user.router)
 app.include_router(account.router)
-app.include_router(account_snapshot.router)
 app.include_router(income.router)
 app.include_router(loan.router)
 app.include_router(credit_card.router)
-app.include_router(cashback_rate.router)
 app.include_router(recurring_payment.router)
-app.include_router(transaction.router)
 app.include_router(metadata.router)

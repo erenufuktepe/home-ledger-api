@@ -34,7 +34,7 @@ async def get_account(
 async def create_account(
     request: AccountCreateRequest,
     service: Annotated[AccountService, Depends(get_account_service)],
-) -> bool:
+) -> AccountDTO:
     return service.create_account(request)
 
 
@@ -42,7 +42,7 @@ async def create_account(
 async def update_account(
     request: AccountUpdateRequest,
     service: Annotated[AccountService, Depends(get_account_service)],
-) -> bool:
+) -> AccountDTO:
     return service.update_account(request)
 
 

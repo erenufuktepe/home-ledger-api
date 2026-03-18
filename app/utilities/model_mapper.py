@@ -52,7 +52,7 @@ class ModelMapper:
             fields = {col.name for col in model_class.__table__.columns}
             filtered = {k: v for k, v in data.items() if k in fields}
             return model_class(**filtered)
-        except Exception as exc:
+        except (AttributeError, TypeError, ValueError, KeyError) as exc:
             raise ModelMapperException(f"Error converting schema to model: {exc}")
 
     @classmethod
@@ -88,14 +88,14 @@ class ModelMapper:
                     else:
                         data[field_name] = value
             return schema_class(**data)
-        except Exception as exc:
+        except (AttributeError, TypeError, ValueError, KeyError) as exc:
             raise ModelMapperException(f"Error converting model to schema: {exc}")
 
     @classmethod
     def from_model_list(cls, model_list: list[T], schema_class: Type[S]) -> list[S]:
         try:
             return [cls.from_model(model, schema_class) for model in model_list]
-        except Exception as exc:
+        except (AttributeError, TypeError, ValueError, KeyError) as exc:
             raise ModelMapperException(
                 f"Error converting model list to schema list: {exc}"
             )
@@ -104,7 +104,7 @@ class ModelMapper:
     def from_schema_list(cls, schema_list: list[S], model_class: Type[T]) -> list[T]:
         try:
             return [cls.from_schema(schema, model_class) for schema in schema_list]
-        except Exception as exc:
+        except (AttributeError, TypeError, ValueError, KeyError) as exc:
             raise ModelMapperException(
                 f"Error converting schema list to model list: {exc}"
             )
@@ -116,5 +116,5 @@ class ModelMapper:
             fields = schema_class.model_fields.keys()
             filtered = {k: v for k, v in data.items() if k in fields}
             return schema_class(**filtered)
-        except Exception as exc:
+        except (AttributeError, TypeError, ValueError, KeyError) as exc:
             raise ModelMapperException(f"Error converting schema to schema: {exc}")

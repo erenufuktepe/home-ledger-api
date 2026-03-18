@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
@@ -16,6 +16,8 @@ class LoanDTO(BaseModel):
     apr: Decimal | None = Field(None, description="Loan APR percentage.", example=6.75)
     due_day: int = Field(..., description="Due day for the paymet (1-31).")
     end_date: date | None = Field(None, description="Last payment date for the loan.")
+    created_datetime: datetime | None = Field(None, description="Record creation timestamp.")
+    updated_datetime: datetime | None = Field(None, description="Record last updated timestamp.")
 
 
 class LoanCreateRequest(BaseModel):

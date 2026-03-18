@@ -1,8 +1,7 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
-from app.exceptions import AppError
 from app.routes.dependencies import get_user_service
 from app.schemas import UserCreateRequest, UserDTO, UserUpdateRequest
 from app.services import UserService
@@ -28,29 +27,20 @@ async def get_user(
 async def create_user(
     request: UserCreateRequest,
     service: Annotated[UserService, Depends(get_user_service)],
-) -> bool:
-    try:
-        return service.create_user(request)
-    except AppError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+) -> UserDTO:
+    return service.create_user(request)
 
 
 @router.put("/user", status_code=200)
 async def update_user(
     request: UserUpdateRequest,
     service: Annotated[UserService, Depends(get_user_service)],
-) -> bool:
-    try:
-        return service.update_user(request)
-    except AppError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+) -> UserDTO:
+    return service.update_user(request)
 
 
 @router.delete("/user/{id}", status_code=200)
 async def delete_user(
     id: int, service: Annotated[UserService, Depends(get_user_service)]
-) -> bool | None:
-    try:
-        return service.delete_user(id)
-    except AppError as exc:
-        raise HTTPException(status_code=exc.status_code, detail=exc.message)
+) -> bool:
+    return service.delete_user(id)

@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Generic, Type, TypeVar
+from typing import Any, Generic, Type, TypeVar
 
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import Session
@@ -31,7 +31,7 @@ class BaseRepository(Generic[T], ABC):
 
         return pk_cols[0].name
 
-    def get_by_id(self, id_value: any) -> T:
+    def get_by_id(self, id_value: Any) -> T:
         """Fetch one row by primary key, no matter what the PK column is."""
         pk_name = self._get_primary_key_name()
         return (
@@ -60,6 +60,6 @@ class BaseRepository(Generic[T], ABC):
         self.session.flush()
         return True
 
-    def get_all(self):
+    def get_all(self) -> list[T]:
         """Return all objects of this model."""
         return self.session.query(self.model).all()

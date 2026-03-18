@@ -1,18 +1,12 @@
 CREATE SCHEMA IF NOT EXISTS finance;
 
-DROP TABLE IF EXISTS finance.transactions;
-
 DROP TABLE IF EXISTS finance.recurring_payments;
-
-DROP TABLE IF EXISTS finance.cashback_rates;
 
 DROP TABLE IF EXISTS finance.credit_cards;
 
 DROP TABLE IF EXISTS finance.loans;
 
 DROP TABLE IF EXISTS finance.incomes;
-
-DROP TABLE IF EXISTS finance.account_snapshots;
 
 DROP TABLE IF EXISTS finance.accounts;
 
@@ -37,17 +31,6 @@ CREATE TABLE IF NOT EXISTS finance.accounts (
     updated_datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_accounts_user_id
         FOREIGN KEY (user_id) REFERENCES finance.users (id)
-);
-
-CREATE TABLE IF NOT EXISTS finance.account_snapshots (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    account_id BIGINT NOT NULL,
-    balance NUMERIC(12, 2) NOT NULL,
-    snapshot_datetime TIMESTAMP NOT NULL,
-    created_datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_account_snapshots_account_id
-        FOREIGN KEY (account_id) REFERENCES finance.accounts (id)
 );
 
 CREATE TABLE IF NOT EXISTS finance.incomes (
@@ -90,18 +73,6 @@ CREATE TABLE IF NOT EXISTS finance.credit_cards (
         FOREIGN KEY (user_id) REFERENCES finance.users (id)
 );
 
-CREATE TABLE IF NOT EXISTS finance.cashback_rates (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    card_id BIGINT NOT NULL,
-    category VARCHAR(50) NOT NULL,
-    percentage NUMERIC(5, 2) NOT NULL,
-    created_datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_cashback_rates_card_category UNIQUE (card_id, category),
-    CONSTRAINT fk_cashback_rates_card_id
-        FOREIGN KEY (card_id) REFERENCES finance.credit_cards (id)
-);
-
 CREATE TABLE finance.recurring_payments (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
@@ -122,15 +93,4 @@ CREATE TABLE finance.recurring_payments (
         FOREIGN KEY (account_id) REFERENCES finance.accounts (id),
     CONSTRAINT fk_recurring_payments_credit_card_id
         FOREIGN KEY (credit_card_id) REFERENCES finance.credit_cards (id)
-);
-
-CREATE TABLE IF NOT EXISTS finance.transactions (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    amount NUMERIC(12, 2) NOT NULL,
-    recurring_payment_id BIGINT NULL,
-    transaction_datetime TIMESTAMP NOT NULL,
-    created_datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_transactions_recurring_payment_id
-        FOREIGN KEY (recurring_payment_id) REFERENCES finance.recurring_payments (id)
 );

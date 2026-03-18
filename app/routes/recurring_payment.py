@@ -20,6 +20,14 @@ async def get_all_recurring_payments(
     return service.get_all_recurring_payments()
 
 
+@router.get("/recurring-payment/user/{user_id}", status_code=200)
+async def get_recurring_payments_by_user_id(
+    user_id: int,
+    service: Annotated[RecurringPaymentService, Depends(get_recurring_payment_service)],
+) -> list[RecurringPaymentDTO]:
+    return service.get_recurring_payments_by_user_id(user_id)
+
+
 @router.get("/recurring-payment/{id}", status_code=200)
 async def get_recurring_payment(
     id: int,
@@ -32,7 +40,7 @@ async def get_recurring_payment(
 async def create_recurring_payment(
     request: RecurringPaymentCreateRequest,
     service: Annotated[RecurringPaymentService, Depends(get_recurring_payment_service)],
-) -> bool:
+) -> RecurringPaymentDTO:
     return service.create_recurring_payment(request)
 
 
@@ -40,7 +48,7 @@ async def create_recurring_payment(
 async def update_recurring_payment(
     request: RecurringPaymentUpdateRequest,
     service: Annotated[RecurringPaymentService, Depends(get_recurring_payment_service)],
-) -> bool:
+) -> RecurringPaymentDTO:
     return service.update_recurring_payment(request)
 
 

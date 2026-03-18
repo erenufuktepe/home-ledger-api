@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 
-from app.exceptions import NotFoundError
+from app.exceptions import ConflictError, NotFoundError
 from app.models import Income
 from app.repositories import IncomeRepository
 from app.schemas import IncomeCreateRequest, IncomeDTO, IncomeUpdateRequest
@@ -23,16 +23,21 @@ class IncomeService:
             raise NotFoundError(f"Income with {id} not found.")
         return ModelMapper.from_model(income, IncomeDTO)
 
-    def create_income(self, request: IncomeCreateRequest) -> bool:
+    def get_incomes_by_user_id(self, user_id: int) -> list[IncomeDTO]:
+        incomes = self.repository.get_all_by_user_id(user_id)
+        if not incomes:
+            return []
+        return ModelMapper.from_model_list(incomes, IncomeDTO)
+
+    def create_income(self, request: IncomeCreateRequest) -> IncomeDTO:
         try:
             income = ModelMapper.from_schema(request, Income)
-            if not self.repository.insert(income):
-                return False
-            return True
+            created = self.repository.insert(income)
+            return ModelMapper.from_model(created, IncomeDTO)
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.user_id} not found.")
+            raise ConflictError({"user_id": request.user_id}, message=f"User with id {request.user_id} not found.") from exc
 
-    def update_income(self, request: IncomeUpdateRequest) -> bool:
+    def update_income(self, request: IncomeUpdateRequest) -> IncomeDTO:
         try:
             income = self.repository.get_by_id(request.id)
             if not income:
@@ -42,11 +47,10 @@ class IncomeService:
             income.income_type = request.income_type
             income.frequency = request.frequency
 
-            if not self.repository.upsert(income):
-                return False
-            return True
+            updated = self.repository.upsert(income)
+            return ModelMapper.from_model(updated, IncomeDTO)
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.user_id} not found.")
+            raise ConflictError({"user_id": request.user_id}, message=f"User with id {request.user_id} not found.") from exc
 
     def delete_income(self, id: int) -> bool:
         income = self.repository.get_by_id(id)

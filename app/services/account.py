@@ -1,22 +1,15 @@
-from datetime import datetime
-
 from sqlalchemy.exc import IntegrityError
 
-from app.exceptions import NotFoundError
-from app.models import Account, AccountSnapshot
-from app.repositories import AccountRepository, AccountSnapshotRepository
+from app.exceptions import ConflictError, NotFoundError
+from app.models import Account
+from app.repositories import AccountRepository
 from app.schemas import AccountCreateRequest, AccountDTO, AccountUpdateRequest
 from app.utilities import ModelMapper
 
 
 class AccountService:
-    def __init__(
-        self,
-        repository: AccountRepository,
-        account_snapshot_repository: AccountSnapshotRepository,
-    ):
+    def __init__(self, repository: AccountRepository):
         self.repository = repository
-        self.account_snapshot_repository = account_snapshot_repository
 
     def get_all_accounts(self) -> list[AccountDTO]:
         accounts = self.repository.get_all()
@@ -36,29 +29,19 @@ class AccountService:
             raise NotFoundError(f"Account with {id} id not found.")
         return ModelMapper.from_model(account, AccountDTO)
 
-    def create_account(self, request: AccountCreateRequest) -> bool:
+    def create_account(self, request: AccountCreateRequest) -> AccountDTO:
         try:
             account = ModelMapper.from_schema(request, Account)
-            created_account = self.repository.insert(account)
-            if not created_account:
-                return False
-
-            snapshot = AccountSnapshot(
-                account_id=created_account.id,
-                balance=created_account.balance,
-                snapshot_datetime=datetime.utcnow(),
-            )
-            self.account_snapshot_repository.insert(snapshot)
-            return True
+            created = self.repository.insert(account)
+            return ModelMapper.from_model(created, AccountDTO)
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.user_id} id not found.")
+            raise ConflictError({"user_id": request.user_id}, message=f"User with id {request.user_id} not found.") from exc
 
-    def update_account(self, request: AccountUpdateRequest) -> bool:
+    def update_account(self, request: AccountUpdateRequest) -> AccountDTO:
         try:
             account = self.repository.get_by_id(request.id)
             if not account:
                 raise NotFoundError(f"Account with {request.id} id not found.")
-            previous_balance = account.balance
 
             account.user_id = request.user_id
             account.name = request.name
@@ -67,20 +50,10 @@ class AccountService:
             account.apy = request.apy
             account.is_joint = request.is_joint
 
-            updated_account = self.repository.upsert(account)
-            if not updated_account:
-                return False
-
-            if previous_balance != updated_account.balance:
-                snapshot = AccountSnapshot(
-                    account_id=updated_account.id,
-                    balance=updated_account.balance,
-                    snapshot_datetime=datetime.utcnow(),
-                )
-                self.account_snapshot_repository.insert(snapshot)
-            return True
+            updated = self.repository.upsert(account)
+            return ModelMapper.from_model(updated, AccountDTO)
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.user_id} id not found.")
+            raise ConflictError({"user_id": request.user_id}, message=f"User with id {request.user_id} not found.") from exc
 
     def delete_account(self, id: int) -> bool:
         account = self.repository.get_by_id(id)

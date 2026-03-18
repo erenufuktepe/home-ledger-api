@@ -1,6 +1,7 @@
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -26,10 +27,7 @@ class Settings(BaseSettings):
             if origin.strip()
         ]
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        env_nested_delimiter = ","
+    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8", env_nested_delimiter=",")
 
 
 settings = Settings()

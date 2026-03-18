@@ -35,7 +35,7 @@ async def get_credit_card(
 async def create_credit_card(
     request: CreditCardCreateRequest,
     service: Annotated[CreditCardService, Depends(get_credit_card_service)],
-) -> bool:
+) -> CreditCardDTO:
     return service.create_credit_card(request)
 
 
@@ -43,7 +43,7 @@ async def create_credit_card(
 async def update_credit_card(
     request: CreditCardUpdateRequest,
     service: Annotated[CreditCardService, Depends(get_credit_card_service)],
-) -> bool:
+) -> CreditCardDTO:
     return service.update_credit_card(request)
 
 

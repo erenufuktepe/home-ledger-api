@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 
-from app.exceptions import NotFoundError
+from app.exceptions import ConflictError, NotFoundError
 from app.models import CreditCard
 from app.repositories import CreditCardRepository
 from app.schemas import CreditCardCreateRequest, CreditCardDTO, CreditCardUpdateRequest
@@ -29,29 +29,30 @@ class CreditCardService:
             raise NotFoundError(f"Credit card with {id} id not found.")
         return ModelMapper.from_model(credit_card, CreditCardDTO)
 
-    def create_credit_card(self, request: CreditCardCreateRequest) -> bool:
+    def create_credit_card(self, request: CreditCardCreateRequest) -> CreditCardDTO:
         try:
             credit_card = ModelMapper.from_schema(request, CreditCard)
-            if not self.repository.insert(credit_card):
-                return False
-            return True
+            created = self.repository.insert(credit_card)
+            return ModelMapper.from_model(created, CreditCardDTO)
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.user_id} id not found.")
+            raise ConflictError({"user_id": request.user_id}, message=f"User with id {request.user_id} not found.") from exc
 
-    def update_credit_card(self, request: CreditCardUpdateRequest) -> bool:
-        credit_card = self.repository.get_by_id(request.id)
-        if not credit_card:
-            raise NotFoundError(f"Credit card with {request.id} id not found.")
+    def update_credit_card(self, request: CreditCardUpdateRequest) -> CreditCardDTO:
+        try:
+            credit_card = self.repository.get_by_id(request.id)
+            if not credit_card:
+                raise NotFoundError(f"Credit card with {request.id} id not found.")
 
-        credit_card.user_id = request.user_id
-        credit_card.name = request.name
-        credit_card.current_balance = request.current_balance
-        credit_card.apr = request.apr
-        credit_card.credit_limit = request.credit_limit
+            credit_card.user_id = request.user_id
+            credit_card.name = request.name
+            credit_card.current_balance = request.current_balance
+            credit_card.apr = request.apr
+            credit_card.credit_limit = request.credit_limit
 
-        if not self.repository.upsert(credit_card):
-            return False
-        return True
+            updated = self.repository.upsert(credit_card)
+            return ModelMapper.from_model(updated, CreditCardDTO)
+        except IntegrityError as exc:
+            raise ConflictError({"user_id": request.user_id}, message=f"User with id {request.user_id} not found.") from exc
 
     def delete_credit_card(self, id: int) -> bool:
         credit_card = self.repository.get_by_id(id)

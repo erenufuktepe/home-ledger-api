@@ -23,24 +23,22 @@ class UserService:
             raise NotFoundError(f"User with {id} id not found.")
         return ModelMapper.from_model(user, UserDTO)
 
-    def create_user(self, request: UserCreateRequest) -> bool:
+    def create_user(self, request: UserCreateRequest) -> UserDTO:
         try:
             user = ModelMapper.from_schema(request, User)
-            if not self.repository.insert(user):
-                return False
-            return True
+            created = self.repository.insert(user)
+            return ModelMapper.from_model(created, UserDTO)
         except IntegrityError as exc:
-            raise ConflictError(f"User {request.username.title()} already exists.")
+            raise ConflictError({"username": request.username}, message=f"User {request.username.title()} already exists.") from exc
 
-    def update_user(self, request: UserUpdateRequest) -> bool:
+    def update_user(self, request: UserUpdateRequest) -> UserDTO:
         user = self.repository.get_by_id(request.id)
 
         if not user:
             raise NotFoundError(f"User with {request.id} id not found.")
         user.username = request.username.title()
-        if not self.repository.upsert(user):
-            return False
-        return True
+        updated = self.repository.upsert(user)
+        return ModelMapper.from_model(updated, UserDTO)
 
     def delete_user(self, id: int) -> bool:
         user = self.repository.get_by_id(id)

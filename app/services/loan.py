@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 
-from app.exceptions import NotFoundError
+from app.exceptions import ConflictError, NotFoundError
 from app.models import Loan
 from app.repositories import LoanRepository
 from app.schemas import LoanCreateRequest, LoanDTO, LoanUpdateRequest
@@ -23,16 +23,21 @@ class LoanService:
             raise NotFoundError(f"Loan with {id} id not found.")
         return ModelMapper.from_model(loan, LoanDTO)
 
-    def create_loan(self, request: LoanCreateRequest) -> bool:
+    def get_loans_by_user_id(self, user_id: int) -> list[LoanDTO]:
+        loans = self.repository.get_all_by_user_id(user_id)
+        if not loans:
+            return []
+        return ModelMapper.from_model_list(loans, LoanDTO)
+
+    def create_loan(self, request: LoanCreateRequest) -> LoanDTO:
         try:
             loan = ModelMapper.from_schema(request, Loan)
-            if not self.repository.insert(loan):
-                return False
-            return True
+            created = self.repository.insert(loan)
+            return ModelMapper.from_model(created, LoanDTO)
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.user_id} not found.")
+            raise ConflictError({"user_id": request.user_id}, message=f"User with id {request.user_id} not found.") from exc
 
-    def update_loan(self, request: LoanUpdateRequest) -> bool:
+    def update_loan(self, request: LoanUpdateRequest) -> LoanDTO:
         try:
             loan = self.repository.get_by_id(request.id)
             if not loan:
@@ -46,11 +51,10 @@ class LoanService:
             loan.due_day = request.due_day
             loan.end_date = request.end_date
 
-            if not self.repository.upsert(loan):
-                return False
-            return True
+            updated = self.repository.upsert(loan)
+            return ModelMapper.from_model(updated, LoanDTO)
         except IntegrityError as exc:
-            raise NotFoundError(f"User with {request.user_id} not found.")
+            raise ConflictError({"user_id": request.user_id}, message=f"User with id {request.user_id} not found.") from exc
 
     def delete_loan(self, id: int) -> bool:
         loan = self.repository.get_by_id(id)
